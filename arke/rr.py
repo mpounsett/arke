@@ -122,9 +122,9 @@ class RR(object):
     _type_mnemonic = ""
     _type_value = 0
 
-    # A list of class mnemonics valid for this RR type.  A value of ['*']
+    # A list of class mnemonics valid for this RR type.  A value of ('*',)
     # indicates this RR can be used in any class.
-    _valid_classes = ['*']
+    _valid_classes = ('*',)
 
     # A list of the RDATA fields for this RR type
     _rdata_fields = ()
@@ -213,334 +213,234 @@ class _HOST(RR):
 class A(_ADDRESS):
     _type_mnemonic = 'A'
     _type_value = 1
-    _valid_classes = ['*']
 TYPES['A'] = A
 
 
 class NS(_HOST):
     _type_mnemonic = 'NS'
     _type_value = 2
-    _valid_classes = ['*']
 TYPES['NS'] = NS
 
 
-# TODO: finish cleaning up templated classes from this point
-class CNAME(RR):
+class CNAME(_HOST):
     _type_mnemonic = 'CNAME'
     _type_value = 5
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
 TYPES['CNAME'] = CNAME
 
 
 class SOA(RR):
     _type_mnemonic = 'SOA'
     _type_value = 6
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = (
+        'mname', 'rname', 'serial',
+        'refresh', 'retry', 'expiry', 'negttl'
+    )
 TYPES['SOA'] = SOA
 
 
-class MB(RR):
+class MB(_HOST):
     _type_mnemonic = 'MB'
     _type_value = 7
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
 TYPES['MB'] = MB
 
 
 class MG(RR):
     _type_mnemonic = 'MG'
     _type_value = 8
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('mgname',)
 TYPES['MG'] = MG
 
 
 class MR(RR):
     _type_mnemonic = 'MR'
     _type_value = 9
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('newname',)
 TYPES['MR'] = MR
 
 
-class WKS(RR):
+class WKS(_ADDRESS):
     _type_mnemonic = 'WKS'
     _type_value = 11
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('ip', 'protocol', 'bitmap')
 TYPES['WKS'] = WKS
 
 
-class PTR(RR):
+class PTR(_HOST):
     _type_mnemonic = 'PTR'
     _type_value = 12
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
 TYPES['PTR'] = PTR
 
 
 class HINFO(RR):
     _type_mnemonic = 'HINFO'
     _type_value = 13
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('cpu', 'os')
 TYPES['HINFO'] = HINFO
 
 
 class MINFO(RR):
     _type_mnemonic = 'MINFO'
     _type_value = 14
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('rmailbox', 'emailbox')
 TYPES['MINFO'] = MINFO
 
 
 class MX(RR):
     _type_mnemonic = 'MX'
     _type_value = 15
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('preference', 'host')
 TYPES['MX'] = MX
 
 
 class TXT(RR):
     _type_mnemonic = 'TXT'
     _type_value = 16
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('txt',)
 TYPES['TXT'] = TXT
 
 
 class RP(RR):
     _type_mnemonic = 'RP'
     _type_value = 17
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('mbox', 'host')
 TYPES['RP'] = RP
 
 
-class AFSDB(RR):
+class AFSDB(MX):
     _type_mnemonic = 'AFSDB'
     _type_value = 18
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
 TYPES['AFSDB'] = AFSDB
 
 
 class X25(RR):
     _type_mnemonic = 'X25'
     _type_value = 19
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('psdn',)
 TYPES['X25'] = X25
 
 
 class ISDN(RR):
     _type_mnemonic = 'ISDN'
     _type_value = 20
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('pstn', 'sa')
 TYPES['ISDN'] = ISDN
 
 
-class RT(RR):
+class RT(MX):
     _type_mnemonic = 'RT'
     _type_value = 21
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
 TYPES['RT'] = RT
 
 
 class NSAP(RR):
     _type_mnemonic = 'NSAP'
     _type_value = 22
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['NSAP'] = NSAP
 
 
-class NSAP_PTR(RR):
+class NSAP_PTR(PTR):
     _type_mnemonic = 'NSAP-PTR'
     _type_value = 23
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
 TYPES['NSAP-PTR'] = NSAP_PTR
-
-
-class SIG(RR):
-    _type_mnemonic = 'SIG'
-    _type_value = 24
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
-TYPES['SIG'] = SIG
-
-
-class KEY(RR):
-    _type_mnemonic = 'KEY'
-    _type_value = 25
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
-TYPES['KEY'] = KEY
 
 
 class PX(RR):
     _type_mnemonic = 'PX'
     _type_value = 26
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('preference', 'map822', 'mapx400')
 TYPES['PX'] = PX
 
 
 class GPOS(RR):
     _type_mnemonic = 'GPOS'
     _type_value = 27
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('longitude', 'latitude', 'altitude')
 TYPES['GPOS'] = GPOS
 
 
-class AAAA(RR):
+class AAAA(_ADDRESS):
     _type_mnemonic = 'AAAA'
     _type_value = 28
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
 TYPES['AAAA'] = AAAA
 
 
 class LOC(RR):
     _type_mnemonic = 'LOC'
     _type_value = 29
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('version', 'size', 'hprecision', 'vprecision',
+                     'longitude', 'latitude', 'altitude')
 TYPES['LOC'] = LOC
-
-
-class NXT(RR):
-    _type_mnemonic = 'NXT'
-    _type_value = 30
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
-TYPES['NXT'] = NXT
-
-
-class EID(RR):
-    _type_mnemonic = 'EID'
-    _type_value = 31
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
-TYPES['EID'] = EID
-
-
-class NIMLOC(RR):
-    _type_mnemonic = 'NIMLOC'
-    _type_value = 32
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
-TYPES['NIMLOC'] = NIMLOC
 
 
 class SRV(RR):
     _type_mnemonic = 'SRV'
     _type_value = 33
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('priority', 'weight', 'port', 'target')
 TYPES['SRV'] = SRV
-
-
-class ATMA(RR):
-    _type_mnemonic = 'ATMA'
-    _type_value = 34
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
-TYPES['ATMA'] = ATMA
 
 
 class NAPTR(RR):
     _type_mnemonic = 'NAPTR'
     _type_value = 35
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('order', 'preference', 'flags',
+                     'services', 'regexp', 'replacement')
 TYPES['NAPTR'] = NAPTR
 
 
-class KX(RR):
+class KX(MX):
     _type_mnemonic = 'KX'
     _type_value = 36
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
 TYPES['KX'] = KX
 
 
 class CERT(RR):
     _type_mnemonic = 'CERT'
     _type_value = 37
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('type', 'keytag', 'algorithm', 'certificate')
 TYPES['CERT'] = CERT
 
 
-class DNAME(RR):
+class DNAME(CNAME):
     _type_mnemonic = 'DNAME'
     _type_value = 39
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
 TYPES['DNAME'] = DNAME
-
-
-class SINK(RR):
-    _type_mnemonic = 'SINK'
-    _type_value = 40
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
-TYPES['SINK'] = SINK
-
-
-class OPT(RR):
-    _type_mnemonic = 'OPT'
-    _type_value = 41
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
-TYPES['OPT'] = OPT
 
 
 class APL(RR):
     _type_mnemonic = 'APL'
     _type_value = 42
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _valid_classes = ('IN',)
+    _rdata_fields = ('family', 'prefix', 'n', 'afdlength', 'afdpart')
 TYPES['APL'] = APL
 
 
 class DS(RR):
     _type_mnemonic = 'DS'
     _type_value = 43
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('keytag', 'algorithm', 'dtype', 'digest')
 TYPES['DS'] = DS
 
 
 class SSHFP(RR):
     _type_mnemonic = 'SSHFP'
     _type_value = 44
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('algorithm', 'fptype', 'fingerprint')
 TYPES['SSHFP'] = SSHFP
 
 
 class IPSECKEY(RR):
     _type_mnemonic = 'IPSECKEY'
     _type_value = 45
-    _valid_classes = ['*']
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('precedence', 'gatewaytype',
+                     'algorithm', 'gateway', 'key')
 TYPES['IPSECKEY'] = IPSECKEY
 
 
+# TODO: finish cleaning up templated classes from this point
 class RRSIG(RR):
     _type_mnemonic = 'RRSIG'
     _type_value = 46
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['RRSIG'] = RRSIG
 
@@ -548,7 +448,6 @@ TYPES['RRSIG'] = RRSIG
 class NSEC(RR):
     _type_mnemonic = 'NSEC'
     _type_value = 47
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['NSEC'] = NSEC
 
@@ -556,7 +455,6 @@ TYPES['NSEC'] = NSEC
 class DNSKEY(RR):
     _type_mnemonic = 'DNSKEY'
     _type_value = 48
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['DNSKEY'] = DNSKEY
 
@@ -564,7 +462,6 @@ TYPES['DNSKEY'] = DNSKEY
 class DHCID(RR):
     _type_mnemonic = 'DHCID'
     _type_value = 49
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['DHCID'] = DHCID
 
@@ -572,7 +469,6 @@ TYPES['DHCID'] = DHCID
 class NSEC3(RR):
     _type_mnemonic = 'NSEC3'
     _type_value = 50
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['NSEC3'] = NSEC3
 
@@ -580,7 +476,6 @@ TYPES['NSEC3'] = NSEC3
 class NSEC3PARAM(RR):
     _type_mnemonic = 'NSEC3PARAM'
     _type_value = 51
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['NSEC3PARAM'] = NSEC3PARAM
 
@@ -588,7 +483,6 @@ TYPES['NSEC3PARAM'] = NSEC3PARAM
 class TLSA(RR):
     _type_mnemonic = 'TLSA'
     _type_value = 52
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['TLSA'] = TLSA
 
@@ -596,7 +490,6 @@ TYPES['TLSA'] = TLSA
 class SMIMEA(RR):
     _type_mnemonic = 'SMIMEA'
     _type_value = 53
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['SMIMEA'] = SMIMEA
 
@@ -604,7 +497,6 @@ TYPES['SMIMEA'] = SMIMEA
 class Unassigned(RR):
     _type_mnemonic = 'Unassigned'
     _type_value = 54
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['Unassigned'] = Unassigned
 
@@ -612,7 +504,6 @@ TYPES['Unassigned'] = Unassigned
 class HIP(RR):
     _type_mnemonic = 'HIP'
     _type_value = 55
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['HIP'] = HIP
 
@@ -620,7 +511,6 @@ TYPES['HIP'] = HIP
 class NINFO(RR):
     _type_mnemonic = 'NINFO'
     _type_value = 56
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['NINFO'] = NINFO
 
@@ -628,7 +518,6 @@ TYPES['NINFO'] = NINFO
 class RKEY(RR):
     _type_mnemonic = 'RKEY'
     _type_value = 57
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['RKEY'] = RKEY
 
@@ -636,7 +525,6 @@ TYPES['RKEY'] = RKEY
 class TALINK(RR):
     _type_mnemonic = 'TALINK'
     _type_value = 58
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['TALINK'] = TALINK
 
@@ -644,7 +532,6 @@ TYPES['TALINK'] = TALINK
 class CDS(RR):
     _type_mnemonic = 'CDS'
     _type_value = 59
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['CDS'] = CDS
 
@@ -652,7 +539,6 @@ TYPES['CDS'] = CDS
 class CDNSKEY(RR):
     _type_mnemonic = 'CDNSKEY'
     _type_value = 60
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['CDNSKEY'] = CDNSKEY
 
@@ -660,7 +546,6 @@ TYPES['CDNSKEY'] = CDNSKEY
 class OPENPGPKEY(RR):
     _type_mnemonic = 'OPENPGPKEY'
     _type_value = 61
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['OPENPGPKEY'] = OPENPGPKEY
 
@@ -668,7 +553,6 @@ TYPES['OPENPGPKEY'] = OPENPGPKEY
 class CSYNC(RR):
     _type_mnemonic = 'CSYNC'
     _type_value = 62
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['CSYNC'] = CSYNC
 
@@ -676,7 +560,6 @@ TYPES['CSYNC'] = CSYNC
 class SPF(RR):
     _type_mnemonic = 'SPF'
     _type_value = 99
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['SPF'] = SPF
 
@@ -684,7 +567,6 @@ TYPES['SPF'] = SPF
 class UINFO(RR):
     _type_mnemonic = 'UINFO'
     _type_value = 100
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['UINFO'] = UINFO
 
@@ -692,7 +574,6 @@ TYPES['UINFO'] = UINFO
 class UID(RR):
     _type_mnemonic = 'UID'
     _type_value = 101
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['UID'] = UID
 
@@ -700,7 +581,6 @@ TYPES['UID'] = UID
 class GID(RR):
     _type_mnemonic = 'GID'
     _type_value = 102
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['GID'] = GID
 
@@ -708,7 +588,6 @@ TYPES['GID'] = GID
 class UNSPEC(RR):
     _type_mnemonic = 'UNSPEC'
     _type_value = 103
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['UNSPEC'] = UNSPEC
 
@@ -716,7 +595,6 @@ TYPES['UNSPEC'] = UNSPEC
 class NID(RR):
     _type_mnemonic = 'NID'
     _type_value = 104
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['NID'] = NID
 
@@ -724,7 +602,6 @@ TYPES['NID'] = NID
 class L32(RR):
     _type_mnemonic = 'L32'
     _type_value = 105
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['L32'] = L32
 
@@ -732,7 +609,6 @@ TYPES['L32'] = L32
 class L64(RR):
     _type_mnemonic = 'L64'
     _type_value = 106
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['L64'] = L64
 
@@ -740,7 +616,6 @@ TYPES['L64'] = L64
 class LP(RR):
     _type_mnemonic = 'LP'
     _type_value = 107
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['LP'] = LP
 
@@ -748,7 +623,6 @@ TYPES['LP'] = LP
 class EUI48(RR):
     _type_mnemonic = 'EUI48'
     _type_value = 108
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['EUI48'] = EUI48
 
@@ -756,7 +630,6 @@ TYPES['EUI48'] = EUI48
 class EUI64(RR):
     _type_mnemonic = 'EUI64'
     _type_value = 109
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['EUI64'] = EUI64
 
@@ -764,7 +637,6 @@ TYPES['EUI64'] = EUI64
 class URI(RR):
     _type_mnemonic = 'URI'
     _type_value = 256
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['URI'] = URI
 
@@ -772,7 +644,6 @@ TYPES['URI'] = URI
 class CAA(RR):
     _type_mnemonic = 'CAA'
     _type_value = 257
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['CAA'] = CAA
 
@@ -780,7 +651,6 @@ TYPES['CAA'] = CAA
 class AVC(RR):
     _type_mnemonic = 'AVC'
     _type_value = 258
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['AVC'] = AVC
 
@@ -788,7 +658,6 @@ TYPES['AVC'] = AVC
 class TA(RR):
     _type_mnemonic = 'TA'
     _type_value = 32768
-    _valid_classes = ['*']
     _rdata_fields = ('rdata',)
 TYPES['TA'] = TA
 
