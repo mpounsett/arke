@@ -210,6 +210,27 @@ class _HOST(RR):
     _rdata_fields = ('host',)
 
 
+# Type classes are based on RFC definitions for each RR type.  The best
+# starting place for specifics is the IANA DNS Parameters registry.  RR types
+# are listed at
+# https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-4
+
+# Excluded from the below types are any types that:
+# 1) are marked as obsolete
+# 2) do not have a specification listed
+# 3) meta-types (e.g. ANY) and other types seen only on the wire
+# 4) are marked as experimental
+# 5) are defined outside the RFC series
+#
+# (1) should not be implemented as they are obsolete.  (2) cannot be
+# implemented since there is no specification.
+# (3) will be implemented later, when this library is in need of wire-only
+# types
+# Excluding (4) and (5) is purely a work-saving measure, and isn't due to any
+# prejudice against those record types.  They should be added if any users of
+# this library need them, or when someone sufficiently pedantic comes along
+# and contributes code.
+
 class A(_ADDRESS):
     _type_mnemonic = 'A'
     _type_value = 1
@@ -437,25 +458,25 @@ class IPSECKEY(RR):
 TYPES['IPSECKEY'] = IPSECKEY
 
 
-# TODO: finish cleaning up templated classes from this point
 class RRSIG(RR):
     _type_mnemonic = 'RRSIG'
     _type_value = 46
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('covered', 'algorithm', 'labels', 'origttl', 'expire',
+                     'inception', 'keytag', 'signer', 'signature')
 TYPES['RRSIG'] = RRSIG
 
 
 class NSEC(RR):
     _type_mnemonic = 'NSEC'
     _type_value = 47
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('next', 'typemap')
 TYPES['NSEC'] = NSEC
 
 
 class DNSKEY(RR):
     _type_mnemonic = 'DNSKEY'
     _type_value = 48
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('flags', 'protocol', 'algorithm', 'key')
 TYPES['DNSKEY'] = DNSKEY
 
 
@@ -469,74 +490,46 @@ TYPES['DHCID'] = DHCID
 class NSEC3(RR):
     _type_mnemonic = 'NSEC3'
     _type_value = 50
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('algorithm', 'flags', 'optout',
+                     'iterations', 'salt', 'next', 'typemap')
 TYPES['NSEC3'] = NSEC3
 
 
 class NSEC3PARAM(RR):
     _type_mnemonic = 'NSEC3PARAM'
     _type_value = 51
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('algorithm', 'flags', 'iterations', 'salt')
 TYPES['NSEC3PARAM'] = NSEC3PARAM
 
 
 class TLSA(RR):
     _type_mnemonic = 'TLSA'
     _type_value = 52
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('usage', 'selector', 'matching', 'association')
 TYPES['TLSA'] = TLSA
 
 
-class SMIMEA(RR):
+class SMIMEA(TLSA):
     _type_mnemonic = 'SMIMEA'
     _type_value = 53
-    _rdata_fields = ('rdata',)
 TYPES['SMIMEA'] = SMIMEA
-
-
-class Unassigned(RR):
-    _type_mnemonic = 'Unassigned'
-    _type_value = 54
-    _rdata_fields = ('rdata',)
-TYPES['Unassigned'] = Unassigned
 
 
 class HIP(RR):
     _type_mnemonic = 'HIP'
     _type_value = 55
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('algorithm', 'hit', 'pubkey', 'serverlist')
 TYPES['HIP'] = HIP
 
 
-class NINFO(RR):
-    _type_mnemonic = 'NINFO'
-    _type_value = 56
-    _rdata_fields = ('rdata',)
-TYPES['NINFO'] = NINFO
-
-
-class RKEY(RR):
-    _type_mnemonic = 'RKEY'
-    _type_value = 57
-    _rdata_fields = ('rdata',)
-TYPES['RKEY'] = RKEY
-
-
-class TALINK(RR):
-    _type_mnemonic = 'TALINK'
-    _type_value = 58
-    _rdata_fields = ('rdata',)
-TYPES['TALINK'] = TALINK
-
-
-class CDS(RR):
+class CDS(DS):
     _type_mnemonic = 'CDS'
     _type_value = 59
     _rdata_fields = ('rdata',)
 TYPES['CDS'] = CDS
 
 
-class CDNSKEY(RR):
+class CDNSKEY(DNSKEY):
     _type_mnemonic = 'CDNSKEY'
     _type_value = 60
     _rdata_fields = ('rdata',)
@@ -546,120 +539,76 @@ TYPES['CDNSKEY'] = CDNSKEY
 class OPENPGPKEY(RR):
     _type_mnemonic = 'OPENPGPKEY'
     _type_value = 61
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('key',)
 TYPES['OPENPGPKEY'] = OPENPGPKEY
 
 
 class CSYNC(RR):
     _type_mnemonic = 'CSYNC'
     _type_value = 62
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('soa', 'flags', 'typemap')
 TYPES['CSYNC'] = CSYNC
 
 
-class SPF(RR):
+class SPF(TXT):
     _type_mnemonic = 'SPF'
     _type_value = 99
-    _rdata_fields = ('rdata',)
 TYPES['SPF'] = SPF
-
-
-class UINFO(RR):
-    _type_mnemonic = 'UINFO'
-    _type_value = 100
-    _rdata_fields = ('rdata',)
-TYPES['UINFO'] = UINFO
-
-
-class UID(RR):
-    _type_mnemonic = 'UID'
-    _type_value = 101
-    _rdata_fields = ('rdata',)
-TYPES['UID'] = UID
-
-
-class GID(RR):
-    _type_mnemonic = 'GID'
-    _type_value = 102
-    _rdata_fields = ('rdata',)
-TYPES['GID'] = GID
-
-
-class UNSPEC(RR):
-    _type_mnemonic = 'UNSPEC'
-    _type_value = 103
-    _rdata_fields = ('rdata',)
-TYPES['UNSPEC'] = UNSPEC
 
 
 class NID(RR):
     _type_mnemonic = 'NID'
     _type_value = 104
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('preference', 'node')
 TYPES['NID'] = NID
 
 
 class L32(RR):
     _type_mnemonic = 'L32'
     _type_value = 105
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('preference', 'ip')
 TYPES['L32'] = L32
 
 
 class L64(RR):
     _type_mnemonic = 'L64'
     _type_value = 106
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('preference', 'locator')
 TYPES['L64'] = L64
 
 
-class LP(RR):
+class LP(MX):
     _type_mnemonic = 'LP'
     _type_value = 107
-    _rdata_fields = ('rdata',)
 TYPES['LP'] = LP
 
 
 class EUI48(RR):
     _type_mnemonic = 'EUI48'
     _type_value = 108
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('address',)
 TYPES['EUI48'] = EUI48
 
 
 class EUI64(RR):
     _type_mnemonic = 'EUI64'
     _type_value = 109
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('address',)
 TYPES['EUI64'] = EUI64
 
 
 class URI(RR):
     _type_mnemonic = 'URI'
     _type_value = 256
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('priority', 'weight', 'target')
 TYPES['URI'] = URI
 
 
 class CAA(RR):
     _type_mnemonic = 'CAA'
     _type_value = 257
-    _rdata_fields = ('rdata',)
+    _rdata_fields = ('flags', 'tag', 'value')
 TYPES['CAA'] = CAA
-
-
-class AVC(RR):
-    _type_mnemonic = 'AVC'
-    _type_value = 258
-    _rdata_fields = ('rdata',)
-TYPES['AVC'] = AVC
-
-
-class TA(RR):
-    _type_mnemonic = 'TA'
-    _type_value = 32768
-    _rdata_fields = ('rdata',)
-TYPES['TA'] = TA
 
 
 class DLV(DS):
