@@ -158,13 +158,11 @@ class RR(object):
         self.zone = zone
 
         for field in self._rdata_fields:
-            if field in rdata:
-                try:
-                    setattr(self, field, rdata[field])
-                    del(rdata[field])
-                except KeyError:
-                    raise (KeyError,
-                           "rdata field {!r} is required".format(field))
+            try:
+                setattr(self, field, rdata[field])
+                del(rdata[field])
+            except KeyError:
+                raise KeyError("rdata field {!r} is required".format(field))
 
     def __str__(self):
         if self.zone and hasattr(self.zone, '_global_fmt_str'):
