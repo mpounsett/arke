@@ -2,4 +2,7 @@
 # ------------------------------------------------------------
 # Copyright 2017, Matthew Pounsett <matt@conundrum.com>
 # ------------------------------------------------------------
+
+from __future__ import unicode_literals
+
 __VERSION__ = "0.0.1"
