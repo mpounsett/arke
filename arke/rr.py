@@ -34,7 +34,7 @@ def generate(rrtype, **kwargs):
         return rrtype(**kwargs)
     elif isinstance(rrtype, int):
         for t in TYPES:
-            if TYPES[t]._type_value == rrtype:
+            if TYPES[t].value == rrtype:
                 return TYPES[t](**kwargs)
         else:
             return _generate_unknown_type(rrtype, **kwargs)
@@ -55,7 +55,8 @@ def _generate_unknown_type(rrtype, **kwargs):
     assert isinstance(rrtype, int), "rrtype must be an int"
     classname = 'TYPE{}'.format(rrtype)
     classvars = {
-        '_rr_type_value': rrtype,
+        'value': rrtype,
+        'mnemonic': classname,
     }
     newclass = type(classname, (RR,), classvars)
     TYPES[newclass] = rrtype
@@ -119,8 +120,8 @@ class RR(object):
 
     # Override this value in subclasses with the mnemonic and integer type
     # code from the IANA Resource Record Types registry
-    _type_mnemonic = ""
-    _type_value = 0
+    mnemonic = ""
+    value = 0
 
     # A list of class mnemonics valid for this RR type.  A value of ('*',)
     # indicates this RR can be used in any class.
@@ -173,7 +174,7 @@ class RR(object):
             oname=self.oname,
             ttl=self.ttl if self.ttl is not None else "",
             rrclass=_get_class_mnemonic(self.rrclass),
-            rrtype=self._type_mnemonic,
+            rrtype=self.mnemonic,
             rdata=" ".join(map(
                 lambda x: getattr(self, x),
                 self._rdata_fields
@@ -185,7 +186,7 @@ class RR(object):
             "<{cls}(oname={oname!r},rrclass={rrclass!r},ttl={ttl!r},{rdata})>"
         )
         return fmt.format(
-            cls=self._type_mnemonic,
+            cls=self.mnemonic,
             oname=self.oname,
             rrclass=_get_class_mnemonic(self.rrclass),
             ttl=self.ttl,
@@ -232,26 +233,26 @@ class _HOST(RR):
 # and contributes code.
 
 class A(_ADDRESS):
-    _type_mnemonic = 'A'
-    _type_value = 1
+    mnemonic = 'A'
+    value = 1
 TYPES['A'] = A
 
 
 class NS(_HOST):
-    _type_mnemonic = 'NS'
-    _type_value = 2
+    mnemonic = 'NS'
+    value = 2
 TYPES['NS'] = NS
 
 
 class CNAME(_HOST):
-    _type_mnemonic = 'CNAME'
-    _type_value = 5
+    mnemonic = 'CNAME'
+    value = 5
 TYPES['CNAME'] = CNAME
 
 
 class SOA(RR):
-    _type_mnemonic = 'SOA'
-    _type_value = 6
+    mnemonic = 'SOA'
+    value = 6
     _rdata_fields = (
         'mname', 'rname', 'serial',
         'refresh', 'retry', 'expiry', 'negttl'
@@ -260,358 +261,358 @@ TYPES['SOA'] = SOA
 
 
 class MB(_HOST):
-    _type_mnemonic = 'MB'
-    _type_value = 7
+    mnemonic = 'MB'
+    value = 7
 TYPES['MB'] = MB
 
 
 class MG(RR):
-    _type_mnemonic = 'MG'
-    _type_value = 8
+    mnemonic = 'MG'
+    value = 8
     _rdata_fields = ('mgname',)
 TYPES['MG'] = MG
 
 
 class MR(RR):
-    _type_mnemonic = 'MR'
-    _type_value = 9
+    mnemonic = 'MR'
+    value = 9
     _rdata_fields = ('newname',)
 TYPES['MR'] = MR
 
 
 class WKS(_ADDRESS):
-    _type_mnemonic = 'WKS'
-    _type_value = 11
+    mnemonic = 'WKS'
+    value = 11
     _rdata_fields = ('ip', 'protocol', 'bitmap')
 TYPES['WKS'] = WKS
 
 
 class PTR(_HOST):
-    _type_mnemonic = 'PTR'
-    _type_value = 12
+    mnemonic = 'PTR'
+    value = 12
 TYPES['PTR'] = PTR
 
 
 class HINFO(RR):
-    _type_mnemonic = 'HINFO'
-    _type_value = 13
+    mnemonic = 'HINFO'
+    value = 13
     _rdata_fields = ('cpu', 'os')
 TYPES['HINFO'] = HINFO
 
 
 class MINFO(RR):
-    _type_mnemonic = 'MINFO'
-    _type_value = 14
+    mnemonic = 'MINFO'
+    value = 14
     _rdata_fields = ('rmailbox', 'emailbox')
 TYPES['MINFO'] = MINFO
 
 
 class MX(RR):
-    _type_mnemonic = 'MX'
-    _type_value = 15
+    mnemonic = 'MX'
+    value = 15
     _rdata_fields = ('preference', 'host')
 TYPES['MX'] = MX
 
 
 class TXT(RR):
-    _type_mnemonic = 'TXT'
-    _type_value = 16
+    mnemonic = 'TXT'
+    value = 16
     _rdata_fields = ('txt',)
 TYPES['TXT'] = TXT
 
 
 class RP(RR):
-    _type_mnemonic = 'RP'
-    _type_value = 17
+    mnemonic = 'RP'
+    value = 17
     _rdata_fields = ('mbox', 'host')
 TYPES['RP'] = RP
 
 
 class AFSDB(MX):
-    _type_mnemonic = 'AFSDB'
-    _type_value = 18
+    mnemonic = 'AFSDB'
+    value = 18
 TYPES['AFSDB'] = AFSDB
 
 
 class X25(RR):
-    _type_mnemonic = 'X25'
-    _type_value = 19
+    mnemonic = 'X25'
+    value = 19
     _rdata_fields = ('psdn',)
 TYPES['X25'] = X25
 
 
 class ISDN(RR):
-    _type_mnemonic = 'ISDN'
-    _type_value = 20
+    mnemonic = 'ISDN'
+    value = 20
     _rdata_fields = ('pstn', 'sa')
 TYPES['ISDN'] = ISDN
 
 
 class RT(MX):
-    _type_mnemonic = 'RT'
-    _type_value = 21
+    mnemonic = 'RT'
+    value = 21
 TYPES['RT'] = RT
 
 
 class NSAP(RR):
-    _type_mnemonic = 'NSAP'
-    _type_value = 22
+    mnemonic = 'NSAP'
+    value = 22
     _rdata_fields = ('rdata',)
 TYPES['NSAP'] = NSAP
 
 
 class NSAP_PTR(PTR):
-    _type_mnemonic = 'NSAP-PTR'
-    _type_value = 23
+    mnemonic = 'NSAP-PTR'
+    value = 23
 TYPES['NSAP-PTR'] = NSAP_PTR
 
 
 class PX(RR):
-    _type_mnemonic = 'PX'
-    _type_value = 26
+    mnemonic = 'PX'
+    value = 26
     _rdata_fields = ('preference', 'map822', 'mapx400')
 TYPES['PX'] = PX
 
 
 class GPOS(RR):
-    _type_mnemonic = 'GPOS'
-    _type_value = 27
+    mnemonic = 'GPOS'
+    value = 27
     _rdata_fields = ('longitude', 'latitude', 'altitude')
 TYPES['GPOS'] = GPOS
 
 
 class AAAA(_ADDRESS):
-    _type_mnemonic = 'AAAA'
-    _type_value = 28
+    mnemonic = 'AAAA'
+    value = 28
 TYPES['AAAA'] = AAAA
 
 
 class LOC(RR):
-    _type_mnemonic = 'LOC'
-    _type_value = 29
+    mnemonic = 'LOC'
+    value = 29
     _rdata_fields = ('version', 'size', 'hprecision', 'vprecision',
                      'longitude', 'latitude', 'altitude')
 TYPES['LOC'] = LOC
 
 
 class SRV(RR):
-    _type_mnemonic = 'SRV'
-    _type_value = 33
+    mnemonic = 'SRV'
+    value = 33
     _rdata_fields = ('priority', 'weight', 'port', 'target')
 TYPES['SRV'] = SRV
 
 
 class NAPTR(RR):
-    _type_mnemonic = 'NAPTR'
-    _type_value = 35
+    mnemonic = 'NAPTR'
+    value = 35
     _rdata_fields = ('order', 'preference', 'flags',
                      'services', 'regexp', 'replacement')
 TYPES['NAPTR'] = NAPTR
 
 
 class KX(MX):
-    _type_mnemonic = 'KX'
-    _type_value = 36
+    mnemonic = 'KX'
+    value = 36
 TYPES['KX'] = KX
 
 
 class CERT(RR):
-    _type_mnemonic = 'CERT'
-    _type_value = 37
+    mnemonic = 'CERT'
+    value = 37
     _rdata_fields = ('type', 'keytag', 'algorithm', 'certificate')
 TYPES['CERT'] = CERT
 
 
 class DNAME(CNAME):
-    _type_mnemonic = 'DNAME'
-    _type_value = 39
+    mnemonic = 'DNAME'
+    value = 39
 TYPES['DNAME'] = DNAME
 
 
 class APL(RR):
-    _type_mnemonic = 'APL'
-    _type_value = 42
+    mnemonic = 'APL'
+    value = 42
     _valid_classes = ('IN',)
     _rdata_fields = ('family', 'prefix', 'n', 'afdlength', 'afdpart')
 TYPES['APL'] = APL
 
 
 class DS(RR):
-    _type_mnemonic = 'DS'
-    _type_value = 43
+    mnemonic = 'DS'
+    value = 43
     _rdata_fields = ('keytag', 'algorithm', 'dtype', 'digest')
 TYPES['DS'] = DS
 
 
 class SSHFP(RR):
-    _type_mnemonic = 'SSHFP'
-    _type_value = 44
+    mnemonic = 'SSHFP'
+    value = 44
     _rdata_fields = ('algorithm', 'fptype', 'fingerprint')
 TYPES['SSHFP'] = SSHFP
 
 
 class IPSECKEY(RR):
-    _type_mnemonic = 'IPSECKEY'
-    _type_value = 45
+    mnemonic = 'IPSECKEY'
+    value = 45
     _rdata_fields = ('precedence', 'gatewaytype',
                      'algorithm', 'gateway', 'key')
 TYPES['IPSECKEY'] = IPSECKEY
 
 
 class RRSIG(RR):
-    _type_mnemonic = 'RRSIG'
-    _type_value = 46
+    mnemonic = 'RRSIG'
+    value = 46
     _rdata_fields = ('covered', 'algorithm', 'labels', 'origttl', 'expire',
                      'inception', 'keytag', 'signer', 'signature')
 TYPES['RRSIG'] = RRSIG
 
 
 class NSEC(RR):
-    _type_mnemonic = 'NSEC'
-    _type_value = 47
+    mnemonic = 'NSEC'
+    value = 47
     _rdata_fields = ('next', 'typemap')
 TYPES['NSEC'] = NSEC
 
 
 class DNSKEY(RR):
-    _type_mnemonic = 'DNSKEY'
-    _type_value = 48
+    mnemonic = 'DNSKEY'
+    value = 48
     _rdata_fields = ('flags', 'protocol', 'algorithm', 'key')
 TYPES['DNSKEY'] = DNSKEY
 
 
 class DHCID(RR):
-    _type_mnemonic = 'DHCID'
-    _type_value = 49
+    mnemonic = 'DHCID'
+    value = 49
     _rdata_fields = ('rdata',)
 TYPES['DHCID'] = DHCID
 
 
 class NSEC3(RR):
-    _type_mnemonic = 'NSEC3'
-    _type_value = 50
+    mnemonic = 'NSEC3'
+    value = 50
     _rdata_fields = ('algorithm', 'flags', 'optout',
                      'iterations', 'salt', 'next', 'typemap')
 TYPES['NSEC3'] = NSEC3
 
 
 class NSEC3PARAM(RR):
-    _type_mnemonic = 'NSEC3PARAM'
-    _type_value = 51
+    mnemonic = 'NSEC3PARAM'
+    value = 51
     _rdata_fields = ('algorithm', 'flags', 'iterations', 'salt')
 TYPES['NSEC3PARAM'] = NSEC3PARAM
 
 
 class TLSA(RR):
-    _type_mnemonic = 'TLSA'
-    _type_value = 52
+    mnemonic = 'TLSA'
+    value = 52
     _rdata_fields = ('usage', 'selector', 'matching', 'association')
 TYPES['TLSA'] = TLSA
 
 
 class SMIMEA(TLSA):
-    _type_mnemonic = 'SMIMEA'
-    _type_value = 53
+    mnemonic = 'SMIMEA'
+    value = 53
 TYPES['SMIMEA'] = SMIMEA
 
 
 class HIP(RR):
-    _type_mnemonic = 'HIP'
-    _type_value = 55
+    mnemonic = 'HIP'
+    value = 55
     _rdata_fields = ('algorithm', 'hit', 'pubkey', 'serverlist')
 TYPES['HIP'] = HIP
 
 
 class CDS(DS):
-    _type_mnemonic = 'CDS'
-    _type_value = 59
+    mnemonic = 'CDS'
+    value = 59
     _rdata_fields = ('rdata',)
 TYPES['CDS'] = CDS
 
 
 class CDNSKEY(DNSKEY):
-    _type_mnemonic = 'CDNSKEY'
-    _type_value = 60
+    mnemonic = 'CDNSKEY'
+    value = 60
     _rdata_fields = ('rdata',)
 TYPES['CDNSKEY'] = CDNSKEY
 
 
 class OPENPGPKEY(RR):
-    _type_mnemonic = 'OPENPGPKEY'
-    _type_value = 61
+    mnemonic = 'OPENPGPKEY'
+    value = 61
     _rdata_fields = ('key',)
 TYPES['OPENPGPKEY'] = OPENPGPKEY
 
 
 class CSYNC(RR):
-    _type_mnemonic = 'CSYNC'
-    _type_value = 62
+    mnemonic = 'CSYNC'
+    value = 62
     _rdata_fields = ('soa', 'flags', 'typemap')
 TYPES['CSYNC'] = CSYNC
 
 
 class SPF(TXT):
-    _type_mnemonic = 'SPF'
-    _type_value = 99
+    mnemonic = 'SPF'
+    value = 99
 TYPES['SPF'] = SPF
 
 
 class NID(RR):
-    _type_mnemonic = 'NID'
-    _type_value = 104
+    mnemonic = 'NID'
+    value = 104
     _rdata_fields = ('preference', 'node')
 TYPES['NID'] = NID
 
 
 class L32(RR):
-    _type_mnemonic = 'L32'
-    _type_value = 105
+    mnemonic = 'L32'
+    value = 105
     _rdata_fields = ('preference', 'ip')
 TYPES['L32'] = L32
 
 
 class L64(RR):
-    _type_mnemonic = 'L64'
-    _type_value = 106
+    mnemonic = 'L64'
+    value = 106
     _rdata_fields = ('preference', 'locator')
 TYPES['L64'] = L64
 
 
 class LP(MX):
-    _type_mnemonic = 'LP'
-    _type_value = 107
+    mnemonic = 'LP'
+    value = 107
 TYPES['LP'] = LP
 
 
 class EUI48(RR):
-    _type_mnemonic = 'EUI48'
-    _type_value = 108
+    mnemonic = 'EUI48'
+    value = 108
     _rdata_fields = ('address',)
 TYPES['EUI48'] = EUI48
 
 
 class EUI64(RR):
-    _type_mnemonic = 'EUI64'
-    _type_value = 109
+    mnemonic = 'EUI64'
+    value = 109
     _rdata_fields = ('address',)
 TYPES['EUI64'] = EUI64
 
 
 class URI(RR):
-    _type_mnemonic = 'URI'
-    _type_value = 256
+    mnemonic = 'URI'
+    value = 256
     _rdata_fields = ('priority', 'weight', 'target')
 TYPES['URI'] = URI
 
 
 class CAA(RR):
-    _type_mnemonic = 'CAA'
-    _type_value = 257
+    mnemonic = 'CAA'
+    value = 257
     _rdata_fields = ('flags', 'tag', 'value')
 TYPES['CAA'] = CAA
 
 
 class DLV(DS):
-    _type_mnemonic = 'DLV'
-    _type_value = 32769
+    mnemonic = 'DLV'
+    value = 32769
 TYPES['DLV'] = DLV
