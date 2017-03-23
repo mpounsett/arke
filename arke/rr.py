@@ -3,8 +3,6 @@
 # Copyright 2017, Matthew Pounsett <matt@conundrum.com>
 # ------------------------------------------------------------
 
-from __future__ import unicode_literals
-
 import re
 
 TYPES = {}
@@ -19,11 +17,7 @@ CLASSES = {
 
 def generate(rrtype, **kwargs):
     """
-    Return the requested subclass of the RR object.
-
-    This method is generally only meant to be used for unknown RR types,
-    or RR types not yet implemented by this library.  For RR types implemented
-    by this library it's better to directly instantiate that RR type's class.
+    Return an instance of the requested subclass of the RR class.
 
     'rrtype' can be a valid class, an integer, a known type mnemonic, or
     TYPE### unknown type notation from RFC3597
@@ -31,38 +25,80 @@ def generate(rrtype, **kwargs):
     'kwargs' varies by RR type, however for unknown types this can only be a
     hash with the single key 'rdata' and the opaque data to be included in the
     record.
+
+    While this method can be used to generate an instance of any RR type's
+    class, it is of particular use for generating unknown types based on the
+    type's int value.
     """
-    if issubclass(rrtype, RR):
-        return rrtype(**kwargs)
+    rrtype = get_type_mnemonic(rrtype)
+    if rrtype in TYPES:
+        return TYPES[rrtype](**kwargs)
+    else:
+        return _generate_unknown_type(get_type_value(rrtype), **kwargs)
+
+
+def get_type_value(rrtype):
+    """
+    Accept an RR type identifier and return the appropriate integer type
+    value.
+
+    rrtype may be one of:
+    - a known type mnemonic (e.g. A, MX)
+    - an integer corresponding to a known or unknown RR type (returns itself)
+    - a TYPE#### text representation of a known or unknown type (see RFC3597)
+    """
+    if type(rrtype) is type and issubclass(rrtype, RR):
+        return rrtype.value
     elif isinstance(rrtype, int):
-        for t in TYPES:
-            if TYPES[t].value == rrtype:
-                return TYPES[t](**kwargs)
-        else:
-            return _generate_unknown_type(rrtype, **kwargs)
+        return rrtype
     elif isinstance(rrtype, str):
         if rrtype.upper() in TYPES:
-            return TYPES[rrtype.upper()](**kwargs)
+            return TYPES[rrtype.upper()].value
         else:
             match = re.search(r'^TYPE(\d+)$', rrtype)
             if match:
-                return generate(match.group(1), **kwargs)
+                return int(match.group(1))
+
+
+def get_type_mnemonic(rrtype):
+    """
+    Accept a RR type identifier and return the appropriate mnemonic.
+
+    rrtype may be one of:
+    - a known type mnemonic (e.g. A, MX) (returns itself)
+    - an integer corresponding to a known or unknown RR type
+    - a TYPE#### text representation of a known or unknown type (see RFC3597)
+    """
+    if type(rrtype) is type and issubclass(rrtype, RR):
+        return rrtype.mnemonic
+    elif isinstance(rrtype, int):
+        for t in TYPES:
+            if TYPES[t].value == rrtype:
+                return t
+        return "TYPE{}".format(rrtype)
+    elif isinstance(rrtype, str):
+        if rrtype.upper() in TYPES:
+            return rrtype.upper()
+        else:
+            match = re.search(r'^TYPE(\d+)$', rrtype)
+            if match:
+                return rrtype
     raise ValueError(
         "rrtype must be a known type mnemonic (e.g. A, MX), an integer, "
-        "or a TYPE#### text representation of an unknown type (see RFC3597)"
+        "or a TYPE#### text representation of an unknown type (see RFC3597) "
+        "({!r} is a {})".format(rrtype, type(rrtype))
     )
 
 
 def _generate_unknown_type(rrtype, **kwargs):
     assert isinstance(rrtype, int), "rrtype must be an int"
-    classname = 'TYPE{}'.format(rrtype)
-    classvars = {
+    mnemonic = 'TYPE{}'.format(rrtype)
+    type_attributes = {
         'value': rrtype,
-        'mnemonic': classname,
+        'mnemonic': mnemonic,
     }
-    newclass = type(classname, (RR,), classvars)
-    TYPES[newclass] = rrtype
-    TYPES[rrtype] = newclass
+    newclass = type(str(mnemonic), (RR,), type_attributes)
+    TYPES[mnemonic] = newclass
     return newclass(**kwargs)
 
 
@@ -78,7 +114,8 @@ def _get_class_value(rrclass):
                 return k
     raise ValueError(
         "rrclass must be a known class mnemonic (e.g. IN, CH), an integer, "
-        "or a CLASS### text representation of an unknown class (see RFC3597)"
+        "or a CLASS### text representation of an unknown class (see RFC3597) "
+        "({!r} is a {})".format(rrclass, type(rrclass))
     )
 
 
@@ -96,7 +133,8 @@ def _get_class_mnemonic(rrclass):
                 return rrclass
     raise ValueError(
         "rrclass must be a known class mnemonic (e.g. IN, CH), an integer, "
-        "or a CLASS### text representation of an unknown class (see RFC3597)"
+        "or a CLASS### text representation of an unknown class (see RFC3597) "
+        "({!r} is a {})".format(rrclass, type(rrclass))
     )
 
 
@@ -109,7 +147,8 @@ def _get_class_long_name(rrclass):
         return "CLASS{}".format(rrclass)
     raise ValueError(
         "rrclass must be a known class mnemonic (e.g. IN, CH), an integer, "
-        "or a CLASS### text representation of an unknown class (see RFC3597)"
+        "or a CLASS### text representation of an unknown class (see RFC3597) "
+        "({!r} is a {})".format(rrclass, type(rrclass))
     )
 
 
@@ -130,7 +169,7 @@ class RR(object):
     _valid_classes = ('*',)
 
     # A list of the RDATA fields for this RR type
-    _rdata_fields = ()
+    _rdata_fields = ('rdata',)
 
     # The default format string for this RR ttype's string representation.
     # This can be overridden to add formatting (e.g. field widths).  If
