@@ -4,9 +4,14 @@ Arke DNS Library
 A native python library that provides an interface to the DNS protocol.
 """
 from distutils.util import convert_path
-from pip.download import PipSession
-from pip.req import parse_requirements
 from setuptools import setup, find_packages
+from unittest import TestLoader
+
+
+def get_test_suite():
+    test_loader = TestLoader()
+    test_suite = test_loader.discover('tests', pattern='test_*.py')
+    return test_suite
 
 main_ns = {}
 ver_path = convert_path('arke/version.py')
@@ -39,10 +44,11 @@ setup(
         'Topic :: System :: Networking',
     ],
 
+    test_suite='setup.get_test_suite',
     packages=find_packages(),
     install_requires=[
-        str(x.req) for x in parse_requirements('requirements.txt',
-                                               session=PipSession())
+        'pip>=6.0.4',
+        'future>=0.16',
     ],
 
 )
