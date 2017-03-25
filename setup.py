@@ -47,7 +47,6 @@ setup(
     test_suite='setup.get_test_suite',
     packages=find_packages(),
     install_requires=[
-        'pip>=6.0.4',
         'future>=0.16',
         'enum34;python_version<"3.4"',
     ],
