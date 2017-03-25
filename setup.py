@@ -49,6 +49,7 @@ setup(
     install_requires=[
         'pip>=6.0.4',
         'future>=0.16',
+        'enum34;python_version<"3.4"',
     ],
 
 )
