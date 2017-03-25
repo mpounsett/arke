@@ -27,7 +27,7 @@ setup(
 
     author="Matthew Pounsett",
     author_email="matt@conundrum.com",
-    license="NONE",
+    license="Apache Software License 2.0",
 
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
