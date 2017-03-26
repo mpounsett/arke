@@ -63,5 +63,5 @@ SAMPLE_TOKEN = [
 
 class TestTokenizer(unittest.TestCase):
     def test_tokenizer(self):
-        t = arke.tokenizer.Tokenizer(StringIO(SAMPLE_TEXT))
+        t = arke.tokenizer._Tokenizer(StringIO(SAMPLE_TEXT))
         self.assertEqual(list(iter(t)), SAMPLE_TOKEN)

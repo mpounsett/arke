@@ -43,7 +43,7 @@ DELIMITERS = [
 ]
 
 
-class Tokenizer(object):
+class _Tokenizer(object):
     def __init__(self, f):
         self.f = f
 
@@ -180,3 +180,8 @@ class Tokenizer(object):
                 self.f.read(1)
                 return value
             value += self.f.read(1)
+
+
+class _MasterParser(object):
+    def __init__(self):
+        pass
