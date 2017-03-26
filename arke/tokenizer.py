@@ -5,21 +5,9 @@
 
 import enum
 
+import arke.zone
 
-class TokenizerError(Exception):
-    pass
-
-
-class UnexpectedEOL(TokenizerError):
-    pass
-
-
-class UnexpectedEOF(TokenizerError):
-    pass
-
-
-class UnbalancedParentheses(TokenizerError):
-    pass
+from arke.error import UnbalancedParentheses, UnexpectedEOL, UnexpectedEOF
 
 
 class TokenType(enum.Enum):
@@ -182,6 +170,10 @@ class _Tokenizer(object):
             value += self.f.read(1)
 
 
-class _MasterParser(object):
-    def __init__(self):
+class _Parser(object):
+    def __init__(self, filename, zone):
+        self.filename = filename
+        self.zone = arke.zone.Zone(zone)
+
+    def run(self):
         pass

@@ -1,0 +1,32 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------
+# Copyright 2017, Matthew Pounsett <matt@conundrum.com>
+# ------------------------------------------------------------
+
+
+class ArkeError(Exception):
+    pass
+
+
+class TokenizerError(ArkeError):
+    pass
+
+
+class UnexpectedEOL(TokenizerError):
+    pass
+
+
+class UnexpectedEOF(TokenizerError):
+    pass
+
+
+class UnbalancedParentheses(TokenizerError):
+    pass
+
+
+class ParserError(ArkeError):
+    pass
+
+
+class FileNotFound(ParserError):
+    pass
