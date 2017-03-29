@@ -11,6 +11,10 @@ class Domain(object):
     Creates a domain name object, optionally rooted below another ORIGIN
     domain name.  Names that do not specify an ORIGIN are assumed to be fully
     qualified.
+
+    Domain objects should be treated as immutable.  Although they are
+    currently implemented as mutable, this is not their intended behaviour and
+    will, at some point, be changed.
     """
     def __init__(self, name, origin=None):
         if origin is not None and not isinstance(origin, Domain):
