@@ -149,14 +149,3 @@ class TestGenerateMethods(unittest.TestCase):
         self.assertEqual(r.mnemonic, 'TYPE65280')
         self.assertEqual(r.ttl, 200)
         self.assertEqual(r.rdata, 'more random text')
-
-
-class TestNameClass(unittest.TestCase):
-    def test_name_class(self):
-        domain = 'domain.with.escaped\.periods.in.it.tld.'
-        domain_l = ['domain', 'with', 'escaped.periods', 'in', 'it', 'tld', '']
-        domain_r = "<Name(name='domain.with.escaped\\.periods.in.it.tld.')>"
-        name = arke.rr.Name(domain)
-        self.assertEqual(name.name, domain_l)
-        self.assertEqual(str(name), domain)
-        self.assertEqual(repr(name), domain_r)
