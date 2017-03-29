@@ -3,19 +3,11 @@
 # Copyright 2017, Matthew Pounsett <matt@conundrum.com>
 # ------------------------------------------------------------
 
+import collections
 import enum
+import re
 
 from arke.error import UnbalancedParentheses, UnexpectedEOL, UnexpectedEOF
-
-
-class TokenType(enum.Enum):
-    EOL = 1
-    EOF = 2
-    SPACE = 3
-    COMMENT = 4
-    STRING = 5
-    WORD = 6
-
 
 DELIMITERS = [
     ';',
@@ -29,6 +21,23 @@ DELIMITERS = [
 ]
 
 
+class TokenType(enum.Enum):
+    EOL = 1
+    EOF = 2
+    SPACE = 3
+    COMMENT = 4
+    STRING = 5
+    WORD = 6
+
+
+class Token(collections.namedtuple('Token', ['type', 'value', 'position'])):
+    pass
+
+
+class Position(collections.namedtuple('Position', ['line', 'column'])):
+    pass
+
+
 class _Tokenizer(object):
     def __init__(self, f):
         self.f = f
@@ -40,38 +49,53 @@ class _Tokenizer(object):
         self.SOL = True
 
     def __iter__(self):
+        line = 1
+        col = 1
+
         while True:
             token = None
             tokentype = None
 
+            this_line = line
+            this_col = col
+
             c = self._peek_next()
 
-            if self._is_whitespace(c) and self.SOL:
+            if self._is_whitespace(c) and self.SOL and not self.multiline:
+                # Whitespace at the start of a line is special, as long as
+                # we're not inside a multiline.
                 token = self._eat_whitespace()
                 tokentype = TokenType.SPACE
                 self.SOL = False
+                col += token
             elif self._is_whitespace(c):
-                self._eat_whitespace()
+                col += self._eat_whitespace()
                 self.SOL = False
-            elif c == '\n' and not self.multiline:
+            elif c == '\n':
+                if not self.multiline:
+                    tokentype = TokenType.EOL
                 self.f.read(1)
-                tokentype = TokenType.EOL
                 self.SOL = True
+                line += 1
+                col = 1
             elif c == '"':
                 # Starting a quoted string
                 token = self._get_string()
                 tokentype = TokenType.STRING
+                col += len(token)
                 self.SOL = False
             elif c == ';':
                 # Starting a comment
                 token = self._get_comment()
                 tokentype = TokenType.COMMENT
                 self.SOL = False
+                col += len(token)
             elif c == '(':
                 # starting something multiline
                 self.f.read(1)
                 self.multiline += 1
                 self.SOL = False
+                col += 1
             elif c == ')':
                 # ending something multiline
                 if self.multiline <= 0:
@@ -80,6 +104,7 @@ class _Tokenizer(object):
                     self.f.read(1)
                     self.multiline -= 1
                     self.SOL = False
+                    col += 1
             elif c == '':
                 # reached the end of the file.  Check what our state is and
                 # see if anything is amiss:
@@ -94,9 +119,14 @@ class _Tokenizer(object):
                 token = self._get_word()
                 tokentype = TokenType.WORD
                 self.SOL = False
+                col += len(token)
 
             if tokentype:
-                yield (tokentype, token)
+                yield Token(
+                    type=tokentype,
+                    value=token,
+                    position=Position(this_line, this_col),
+                )
                 if tokentype == TokenType.EOF:
                     break
 
@@ -107,16 +137,14 @@ class _Tokenizer(object):
         return c
 
     def _is_whitespace(self, c):
-        if self.multiline and c == '\n':
+        if re.search(r'\s', c) and c != "\n":
             return True
-        elif c == '\n':
+        else:
             return False
-        elif c.isspace():
-            return True
 
     def _eat_whitespace(self):
         eaten = 0
-        while 1:
+        while True:
             c = self._peek_next()
             if self._is_whitespace(c):
                 self.f.read(1)
@@ -125,14 +153,9 @@ class _Tokenizer(object):
                 return eaten
 
     def _get_string(self):
-        value = ""
-        # eat the opening quote char
-        c = self.f.read(1)
-        while 1:
-            if self._peek_next() == '"' and self.escaped is False:
-                # eat the closing quote
-                self.f.read(1)
-                return value
+        # The first character should be the opening quote
+        value = self.f.read(1)
+        while True:
             c = self.f.read(1)
             if c == '\\' and self.escaped is False:
                 self.escaped = True
@@ -141,12 +164,11 @@ class _Tokenizer(object):
             elif c == '\n':
                 raise UnexpectedEOL
             value += c
+            if c == '"' and self.escaped is False:
+                return value
 
     def _get_comment(self):
         value = ""
-        # eat the opening semicolon and whitespace
-        self.f.read(1)
-        self._eat_whitespace()
         while True:
             if self._peek_next() == ')' and self.multiline:
                 # while in multiline mode, a ) is not part of a comment
@@ -158,7 +180,7 @@ class _Tokenizer(object):
 
     def _get_word(self):
         value = ""
-        while 1:
+        while True:
             c = self._peek_next()
             if c in DELIMITERS:
                 return value

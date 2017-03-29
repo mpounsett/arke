@@ -15,7 +15,7 @@ except ImportError:
 sys.path.insert(0,
                 os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
                 )
-import arke.tokenizer
+from arke.tokenizer import _Tokenizer, TokenType, Position
 
 
 SAMPLE_TEXT = inspect.cleandoc(
@@ -32,36 +32,36 @@ SAMPLE_TEXT = inspect.cleandoc(
 )
 
 SAMPLE_TOKEN = [
-    (arke.tokenizer.TokenType.WORD, '@'),
-    (arke.tokenizer.TokenType.WORD, 'IN'),
-    (arke.tokenizer.TokenType.WORD, 'SOA'),
-    (arke.tokenizer.TokenType.WORD, 'foo.example.com.'),
-    (arke.tokenizer.TokenType.WORD, 'hostmaster.example.com.'),
-    (arke.tokenizer.TokenType.WORD, '1'),
-    (arke.tokenizer.TokenType.COMMENT, 'serial'),
-    (arke.tokenizer.TokenType.WORD, '3600'),
-    (arke.tokenizer.TokenType.COMMENT, 'refresh'),
-    (arke.tokenizer.TokenType.WORD, '3600'),
-    (arke.tokenizer.TokenType.COMMENT, 'retry'),
-    (arke.tokenizer.TokenType.WORD, '2'),
-    (arke.tokenizer.TokenType.COMMENT, 'expiry'),
-    (arke.tokenizer.TokenType.WORD, '300'),
-    (arke.tokenizer.TokenType.COMMENT, 'negttl '),
-    (arke.tokenizer.TokenType.EOL, None),
-    (arke.tokenizer.TokenType.SPACE, 4),
-    (arke.tokenizer.TokenType.WORD, 'IN'),
-    (arke.tokenizer.TokenType.WORD, 'A'),
-    (arke.tokenizer.TokenType.WORD, '192.0.2.1'),
-    (arke.tokenizer.TokenType.EOL, None),
-    (arke.tokenizer.TokenType.WORD, 'foo'),
-    (arke.tokenizer.TokenType.WORD, 'IN'),
-    (arke.tokenizer.TokenType.WORD, 'A'),
-    (arke.tokenizer.TokenType.WORD, '192.0.2.2'),
-    (arke.tokenizer.TokenType.EOF, None)
+    (TokenType.WORD, '@', Position(line=1, column=1)),
+    (TokenType.WORD, 'IN', Position(line=1, column=3)),
+    (TokenType.WORD, 'SOA', Position(line=1, column=6)),
+    (TokenType.WORD, 'foo.example.com.', Position(line=1, column=10)),
+    (TokenType.WORD, 'hostmaster.example.com.', Position(line=1, column=27)),
+    (TokenType.WORD, '1', Position(line=2, column=13)),
+    (TokenType.COMMENT, '; serial', Position(line=2, column=15)),
+    (TokenType.WORD, '3600', Position(line=3, column=13)),
+    (TokenType.COMMENT, '; refresh', Position(line=3, column=17)),
+    (TokenType.WORD, '3600', Position(line=4, column=13)),
+    (TokenType.COMMENT, '; retry', Position(line=4, column=18)),
+    (TokenType.WORD, '2', Position(line=5, column=13)),
+    (TokenType.COMMENT, '; expiry', Position(line=5, column=15)),
+    (TokenType.WORD, '300', Position(line=6, column=13)),
+    (TokenType.COMMENT, '; negttl ', Position(line=6, column=16)),
+    (TokenType.EOL, None, Position(line=6, column=26)),
+    (TokenType.SPACE, 4, Position(line=7, column=1)),
+    (TokenType.WORD, 'IN', Position(line=7, column=5)),
+    (TokenType.WORD, 'A', Position(line=7, column=8)),
+    (TokenType.WORD, '192.0.2.1', Position(line=7, column=10)),
+    (TokenType.EOL, None, Position(line=7, column=19)),
+    (TokenType.WORD, 'foo', Position(line=8, column=1)),
+    (TokenType.WORD, 'IN', Position(line=8, column=5)),
+    (TokenType.WORD, 'A', Position(line=8, column=8)),
+    (TokenType.WORD, '192.0.2.2', Position(line=8, column=10)),
+    (TokenType.EOF, None, Position(line=8, column=19)),
 ]
 
 
 class TestTokenizer(unittest.TestCase):
     def test_tokenizer(self):
-        t = arke.tokenizer._Tokenizer(StringIO(SAMPLE_TEXT))
+        t = _Tokenizer(StringIO(SAMPLE_TEXT))
         self.assertEqual(list(iter(t)), SAMPLE_TOKEN)

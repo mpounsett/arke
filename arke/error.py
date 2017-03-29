@@ -28,5 +28,6 @@ class ParserError(ArkeError):
     pass
 
 
-class FileNotFound(ParserError):
+class UnexpectedToken(ParserError):
     pass
+
