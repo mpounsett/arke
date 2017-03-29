@@ -9,12 +9,7 @@ import re
 
 TYPES = {}
 
-CLASSES = {
-    1: ['IN', 'Internet'],
-    3: ['CH', 'Chaos'],
-    4: ['HS', 'Hesiod'],
-    255: ['ANY', 'ANY'],
-}
+CLASSES = {}
 
 
 def generate(rrtype, **kwargs):
@@ -34,9 +29,10 @@ def generate(rrtype, **kwargs):
     """
     rrtype = get_type_mnemonic(rrtype)
     if rrtype in TYPES:
-        return TYPES[rrtype](**kwargs)
+        rrtype = TYPES[rrtype]
     else:
-        return _generate_unknown_type(get_type_value(rrtype), **kwargs)
+        rrtype = _generate_unknown_type(get_type_value(rrtype))
+    return rrtype(**kwargs)
 
 
 class Name(object):
@@ -96,6 +92,170 @@ class Name(object):
         )
 
 
+def is_class(rrclass):
+    for k in CLASSES:
+        if rrclass.upper() in CLASSES[k]:
+            return True
+    if re.search(r'^CLASS\d+$', rrclass.uppper()):
+        return True
+    else:
+        return False
+
+
+def get_class(rrclass):
+    if type(rrclass) is type and issubclass(rrclass, Class):
+        return rrclass
+    else:
+        return _generate_unknown_class(get_class_value(rrclass))
+
+
+def get_class_value(rrclass):
+    """
+    Accept an RR class identifier and return the appropriate integer class
+    value.
+
+    rrclass may be one of:
+    - a known class mnemonic (e.g. IN)
+    - an integer corresponding to a known or unknown RR class (returns itself)
+    - a CLASS### text representation of a known or unknown class (see RFC3597)
+    """
+    if type(rrclass) is type and issubclass(rrclass, Class):
+        return rrclass.value
+    elif isinstance(rrclass, int):
+        return rrclass
+    elif isinstance(rrclass, str):
+        if rrclass.upper() in CLASSES:
+            return CLASSES[rrclass.upper()].value
+        else:
+            match = re.search(r'^CLASS(\d+)$', rrclass)
+            if match:
+                return int(match.group(1))
+    raise ValueError(
+        "rrclass must be a known class mnemonic (e.g. IN, CH), an integer, "
+        "or a CLASS### text representation of an unknown class (see RFC3597) "
+        "({!r} is a {})".format(rrclass, type(rrclass))
+    )
+
+
+def get_class_mnemonic(rrclass):
+    """
+    Accept an RR class identifier and return the appropriate text class
+    mnemonic.
+
+    rrclass may be one of:
+    - a known class mnemonic (e.g. IN) (returns itself)
+    - an integer corresponding to a known or unknown RR class
+    - a CLASS### text representation of a known or unknown class (see RFC3597)
+    """
+    if type(rrclass) is type and issubclass(rrclass, Class):
+        return rrclass.mnemonic
+    elif isinstance(rrclass, int):
+        for cls in CLASSES:
+            if rrclass == CLASSES[cls].value:
+                return CLASSES[cls].mnemonic
+        return "CLASS{}".format(int(rrclass))
+    elif isinstance(rrclass, str):
+        if rrclass.upper() in CLASSES:
+            return CLASSES[rrclass.upper()].mnemonic
+        else:
+            match = re.search(r'^CLASS(\d+)$', rrclass.upper())
+            if match:
+                return rrclass
+    raise ValueError(
+        "rrclass must be a known class mnemonic (e.g. IN, CH), an integer, "
+        "or a CLASS### text representation of an unknown class (see RFC3597) "
+        "({!r} is a {})".format(rrclass, type(rrclass))
+    )
+
+
+def get_class_name(rrclass):
+    """
+    Accept an RR class identifier and return the appropriate text long name
+    for the class.
+
+    rrclass may be one of:
+    - a known class mnemonic (e.g. IN)
+    - an integer corresponding to a known or unknown RR class
+    - a CLASS### text representation of a known or unknown class (see RFC3597)
+    """
+    if type(rrclass) is type and issubclass(rrclass, Class):
+        return rrclass.long_name
+    elif isinstance(rrclass, int):
+        for cls in CLASSES:
+            if rrclass == CLASSES[cls].value:
+                return CLASSES[cls].long_name
+    elif isinstance(rrclass, str):
+        if rrclass.upper() in CLASSES:
+            return CLASSES[rrclass.upper()].long_name
+        else:
+            match = re.search(r'^CLASS(\d+)$', rrclass.upper())
+            if match:
+                return rrclass
+    raise ValueError(
+        "rrclass must be a known class mnemonic (e.g. IN, CH), an integer, "
+        "or a CLASS### text representation of an unknown class (see RFC3597) "
+        "({!r} is a {})".format(rrclass, type(rrclass))
+    )
+
+
+def _generate_unknown_class(rrclass):
+    assert isinstance(rrclass, int), "rrclass must be an int"
+    mnemonic = get_class_mnemonic(rrclass)
+    class_attributes = {
+        'value': rrclass,
+        'mnemonic': mnemonic,
+        'long_name': mnemonic,
+    }
+    newclass = type(str(mnemonic), (Class,), class_attributes)
+    CLASSES[mnemonic] = newclass
+    return newclass
+
+
+class Class(object):
+    """
+    RR Class base class
+
+    Subclass this to implement individual RR classes.
+    """
+    mnemonic = None
+    long_name = None
+    value = 0
+
+
+class IN(Class):
+    mnemonic = 'IN'
+    long_name = 'Internet'
+    value = 1
+CLASSES['IN'] = IN
+
+
+class CH(Class):
+    mnemonic = 'CH'
+    long_name = 'Chaos'
+    value = 3
+CLASSES['CH'] = CH
+
+
+class HS(Class):
+    mnemonic = 'HS'
+    long_name = 'Hesiod'
+    value = 4
+CLASSES['HS'] = HS
+
+
+def is_type(rrtype):
+    if isinstance(rrtype, RR):
+        return True
+    elif type(rrtype) is type and issubclass(rrtype, RR):
+        return True
+    elif rrtype.upper() in TYPES:
+        return True
+    elif re.search(r'^TYPE\d+$', rrtype.upper()):
+        return True
+    else:
+        return False
+
+
 def get_type_value(rrtype):
     """
     Accept an RR type identifier and return the appropriate integer type
@@ -117,6 +277,11 @@ def get_type_value(rrtype):
             match = re.search(r'^TYPE(\d+)$', rrtype)
             if match:
                 return int(match.group(1))
+    raise ValueError(
+        "rrtype must be a known type mnemonic (e.g. A, MX), an integer, "
+        "or a TYPE#### text representation of an unknown type (see RFC3597) "
+        "({!r} is a {})".format(rrtype, type(rrtype))
+    )
 
 
 def get_type_mnemonic(rrtype):
@@ -149,7 +314,7 @@ def get_type_mnemonic(rrtype):
     )
 
 
-def _generate_unknown_type(rrtype, **kwargs):
+def _generate_unknown_type(rrtype):
     assert isinstance(rrtype, int), "rrtype must be an int"
     mnemonic = 'TYPE{}'.format(rrtype)
     type_attributes = {
@@ -158,57 +323,7 @@ def _generate_unknown_type(rrtype, **kwargs):
     }
     newclass = type(str(mnemonic), (RR,), type_attributes)
     TYPES[mnemonic] = newclass
-    return newclass(**kwargs)
-
-
-def _get_class_value(rrclass):
-    if type(rrclass) is int:
-        return rrclass
-    if type(rrclass) is str:
-        match = re.search(r'^CLASS(\d+)$', rrclass)
-        if match:
-            return int(match.group(1))
-        for k in CLASSES:
-            if rrclass in CLASSES[k]:
-                return k
-    raise ValueError(
-        "rrclass must be a known class mnemonic (e.g. IN, CH), an integer, "
-        "or a CLASS### text representation of an unknown class (see RFC3597) "
-        "({!r} is a {})".format(rrclass, type(rrclass))
-    )
-
-
-def _get_class_mnemonic(rrclass):
-    if rrclass in CLASSES:
-        return CLASSES[rrclass][0]
-    if type(rrclass) is int:
-        return "CLASS{}".format(rrclass)
-    if type(rrclass) is str:
-        match = re.search(r'^CLASS(\d+)$', rrclass)
-        if match:
-            return rrclass
-        for k in CLASSES:
-            if rrclass in CLASSES[k]:
-                return rrclass
-    raise ValueError(
-        "rrclass must be a known class mnemonic (e.g. IN, CH), an integer, "
-        "or a CLASS### text representation of an unknown class (see RFC3597) "
-        "({!r} is a {})".format(rrclass, type(rrclass))
-    )
-
-
-def _get_class_long_name(rrclass):
-    if type(rrclass) is str:
-        return _get_class_long_name(_get_class_value(rrclass))
-    if type(rrclass) is int:
-        if rrclass in CLASSES:
-            return CLASSES[rrclass][1]
-        return "CLASS{}".format(rrclass)
-    raise ValueError(
-        "rrclass must be a known class mnemonic (e.g. IN, CH), an integer, "
-        "or a CLASS### text representation of an unknown class (see RFC3597) "
-        "({!r} is a {})".format(rrclass, type(rrclass))
-    )
+    return newclass
 
 
 class RR(object):
@@ -245,13 +360,13 @@ class RR(object):
         silently ignored.
         """
         if (self._valid_classes[0] != '*' and
-                _get_class_mnemonic(rrclass) not in self._valid_classes):
+                get_class_mnemonic(rrclass) not in self._valid_classes):
             raise (
                 ValueError,
                 "rrclass {!r} not valid for this RR type".format(rrclass)
             )
         self.oname = oname
-        self.rrclass = _get_class_value(rrclass)
+        self.rrclass = get_class(rrclass)
         self.ttl = ttl
         self.zone = zone
 
@@ -271,7 +386,7 @@ class RR(object):
         return fmt.format(
             oname=self.oname,
             ttl=self.ttl if self.ttl is not None else "",
-            rrclass=_get_class_mnemonic(self.rrclass),
+            rrclass=get_class_mnemonic(self.rrclass),
             rrtype=self.mnemonic,
             rdata=" ".join(map(
                 lambda x: getattr(self, x),
@@ -286,7 +401,7 @@ class RR(object):
         return fmt.format(
             cls=self.mnemonic,
             oname=self.oname,
-            rrclass=_get_class_mnemonic(self.rrclass),
+            rrclass=get_class_mnemonic(self.rrclass),
             ttl=self.ttl,
             rdata=",".join(
                 map(

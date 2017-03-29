@@ -12,6 +12,14 @@ sys.path.insert(0,
 import arke.rr
 
 
+class TestUnknownTypeMethod(unittest.TestCase):
+    def test_from_int(self):
+        r = arke.rr._generate_unknown_type(65280)
+        self.assertTrue(issubclass(r, arke.rr.RR))
+        self.assertEqual(r.value, 65280)
+        self.assertEqual(r.mnemonic, 'TYPE65280')
+
+
 class TestGetTypeValueMethod(unittest.TestCase):
     def test_from_int(self):
         self.assertEqual(arke.rr.get_type_value(1), 1)
@@ -49,20 +57,56 @@ class TestGetTypeMnemonicMethod(unittest.TestCase):
         self.assertEqual(arke.rr.get_type_mnemonic('TYPE65280'), 'TYPE65280')
 
 
-class TestGenerateMethods(unittest.TestCase):
-    def test_generate_unknown_type(self):
-        r = arke.rr._generate_unknown_type(
-            65280,
-            oname='www.example.com',
-            rrclass='IN',
-            ttl=200,
-            rdata='some random value',
-        )
-        self.assertIsInstance(r, arke.rr.RR)
+class TestUnknownClassMethod(unittest.TestCase):
+    def test_from_int(self):
+        r = arke.rr._generate_unknown_class(65280)
+        self.assertTrue(issubclass(r, arke.rr.Class))
         self.assertEqual(r.value, 65280)
-        self.assertEqual(r.mnemonic, 'TYPE65280')
-        self.assertEqual(r.ttl, 200)
-        self.assertEqual(r.rdata, 'some random value')
+        self.assertEqual(r.mnemonic, 'CLASS65280')
+        self.assertEqual(r.long_name, 'CLASS65280')
+
+
+class TestGetClassValueMethod(unittest.TestCase):
+    def test_from_int(self):
+        self.assertEqual(arke.rr.get_class_value(1), 1)
+
+    def test_from_mnemonic(self):
+        self.assertEqual(arke.rr.get_class_value('IN'), 1)
+        self.assertEqual(arke.rr.get_class_value('CH'), 3)
+        self.assertEqual(arke.rr.get_class_value('HS'), 4)
+
+    def test_from_class(self):
+        self.assertEqual(arke.rr.get_class_value(arke.rr.IN), 1)
+        self.assertEqual(arke.rr.get_class_value(arke.rr.CH), 3)
+        self.assertEqual(arke.rr.get_class_value(arke.rr.HS), 4)
+
+    def test_from_unknown(self):
+        self.assertEqual(arke.rr.get_class_value('CLASS65280'), 65280)
+
+
+class TestGetClassMnemonicMethod(unittest.TestCase):
+    def test_from_int(self):
+        self.assertEqual(arke.rr.get_class_mnemonic(1), 'IN')
+        self.assertEqual(arke.rr.get_class_mnemonic(65280), 'CLASS65280')
+
+    def test_from_mnemonic(self):
+        self.assertEqual(arke.rr.get_class_mnemonic('IN'), 'IN')
+        self.assertEqual(arke.rr.get_class_mnemonic('CH'), 'CH')
+        self.assertEqual(arke.rr.get_class_mnemonic('HS'), 'HS')
+
+    def test_from_class(self):
+        self.assertEqual(arke.rr.get_class_mnemonic(arke.rr.IN), 'IN')
+        self.assertEqual(arke.rr.get_class_mnemonic(arke.rr.CH), 'CH')
+        self.assertEqual(arke.rr.get_class_mnemonic(arke.rr.HS), 'HS')
+
+    def test_from_unknown(self):
+        self.assertEqual(
+            arke.rr.get_class_mnemonic('CLASS65280'),
+            'CLASS65280'
+        )
+
+
+class TestGenerateMethods(unittest.TestCase):
 
     def test_generate_from_mnemonic(self):
         r = arke.rr.generate(
