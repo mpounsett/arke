@@ -30,4 +30,3 @@ class ParserError(ArkeError):
 
 class UnexpectedToken(ParserError):
     pass
-
