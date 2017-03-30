@@ -197,6 +197,13 @@ def is_type(rrtype):
         return False
 
 
+def get_type(rrtype):
+    if type(rrtype) is type and issubclass(rrtype, RR):
+        return rrtype
+    else:
+        return _generate_unknown_type(get_type_value(rrtype))
+
+
 def get_type_value(rrtype):
     """
     Accept an RR type identifier and return the appropriate integer type
