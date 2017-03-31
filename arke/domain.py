@@ -39,6 +39,9 @@ class Domain(object):
             name=str(self._label_unsplit()),
         )
 
+    def __hash__(self):
+        return hash(self.name, self.origin)
+
     def __eq__(self, other):
         return self.name == other.name and self.origin == other.origin
 
