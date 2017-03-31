@@ -39,6 +39,26 @@ class Domain(object):
             name=str(self._label_unsplit()),
         )
 
+    def __eq__(self, other):
+        return self.name == other.name and self.origin == other.origin
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __gt__(self, other):
+        return (self.origin > other.origin or
+                reversed(self.name) > reversed(other.name))
+
+    def __ge__(self, other):
+        return self > other or self == other
+
+    def __lt__(self, other):
+        return (self.origin < other.origin or
+                reversed(self.name) < reversed(other.name))
+
+    def __le__(self, other):
+        return self < other or self == other
+
     def fqdn(self):
         """
         Return the FQDN of this domain name.  If there is no origin, this is
