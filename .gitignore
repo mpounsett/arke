@@ -15,3 +15,5 @@ _mailinglist
 Untitled.ipynb
 .ipynb_checkpoints
 *.swp
+.coverage
+htmlcov/
