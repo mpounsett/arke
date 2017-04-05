@@ -5,6 +5,26 @@
 
 from more_itertools import peekable
 
+try:
+    import threading
+    _lock = threading.RLock()
+except ImportError:
+    _lock = None
+
+DOMAINS = {}
+
+
+def _acquireLock():
+    """Get a lock for serializing access to shared data."""
+    if _lock:
+        _lock.acquire()
+
+
+def _releaseLock():
+    """Release serialization lock"""
+    if _lock:
+        _lock.release()
+
 
 class Domain(object):
     """
@@ -30,6 +50,15 @@ class Domain(object):
             name += '.'
         self.name = self._label_split(name)
 
+        _acquireLock()
+        try:
+            if self.fqdn() in DOMAINS:
+                self = DOMAINS[self.fqdn()]
+            else:
+                DOMAINS[self.fqdn()] = self
+        finally:
+            _releaseLock()
+
     def __str__(self):
         return self._label_unsplit()
 
@@ -40,7 +69,7 @@ class Domain(object):
         )
 
     def __hash__(self):
-        return hash(self.name, self.origin)
+        return hash((self.name, self.origin))
 
     def __eq__(self, other):
         return self.name == other.name and self.origin == other.origin
@@ -109,7 +138,7 @@ class Domain(object):
             else:
                 current.append(c)
         labels.append(''.join(current))
-        return labels
+        return tuple(labels)
 
     def _label_unsplit(self):
         return ".".join(

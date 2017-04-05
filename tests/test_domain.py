@@ -15,7 +15,7 @@ import arke.domain
 class TestDomainClass(unittest.TestCase):
     def test_name_class(self):
         domain = 'domain.with.escaped\.periods.in.it.tld.'
-        domain_l = ['domain', 'with', 'escaped.periods', 'in', 'it', 'tld', '']
+        domain_l = ('domain', 'with', 'escaped.periods', 'in', 'it', 'tld', '')
         domain_r = "<Domain(name='domain.with.escaped\\.periods.in.it.tld.')>"
         name = arke.domain.Domain(domain)
         self.assertEqual(name.name, domain_l)
@@ -27,3 +27,12 @@ class TestDomainClass(unittest.TestCase):
         domain = arke.domain.Domain('www', origin=origin)
         self.assertEqual(domain.fqdn(), 'www.example.com.')
         self.assertEqual(str(domain), 'www')
+
+    @unittest.expectedFailure
+    # Need to figure out how to get object equality from the domain generator.
+    def test_domain_singleton(self):
+        x = arke.domain.Domain('foo.example.com.')
+        y = arke.domain.Domain('foo.example.com.')
+        print(arke.domain.DOMAINS)
+        self.assertEqual(x, y)
+        self.assertIs(x, y)
