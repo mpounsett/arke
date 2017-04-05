@@ -14,9 +14,12 @@ import arke.domain
 
 class TestDomainClass(unittest.TestCase):
     def test_name_class(self):
-        domain = 'domain.with.escaped\.periods.in.it.tld.'
-        domain_l = ('domain', 'with', 'escaped.periods', 'in', 'it', 'tld', '')
-        domain_r = "<Domain(name='domain.with.escaped\\.periods.in.it.tld.')>"
+        domain = 'domain\_with.escaped\.characters.in.it.tld.'
+        domain_l = ('domain\_with', 'escaped.characters',
+                    'in', 'it', 'tld', '')
+        domain_r = (
+            "<Domain(name='domain\_with.escaped\\.characters.in.it.tld.')>"
+        )
         name = arke.domain.Domain(domain)
         self.assertEqual(name.name, domain_l)
         self.assertEqual(str(name), domain)
