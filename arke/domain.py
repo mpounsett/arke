@@ -147,3 +147,7 @@ class Domain(object):
         return ".".join(
             map(lambda x: x.replace('.', '\.'), self.name)
         )
+
+    def to_wire(self):
+        return ''.join(['{!s}{!s}'.format(chr(len(label)), label.lower())
+                        for label in self.name]).encode()
