@@ -2,6 +2,9 @@
 # ------------------------------------------------------------
 # Copyright 2017, Matthew Pounsett <matt@conundrum.com>
 # ------------------------------------------------------------
+
+from __future__ import unicode_literals
+
 import inspect
 import os
 import sys

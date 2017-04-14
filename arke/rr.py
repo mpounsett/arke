@@ -3,6 +3,14 @@
 # Copyright 2017, Matthew Pounsett <matt@conundrum.com>
 # ------------------------------------------------------------
 
+from __future__ import unicode_literals
+from builtins import str
+
+try:
+    from __builtin__ import str as builtin_str
+except ImportError:
+    from builtins import str as builtin_str
+
 import re
 
 TYPES = {}
@@ -147,7 +155,7 @@ def _generate_unknown_class(rrclass):
         'mnemonic': mnemonic,
         'long_name': mnemonic,
     }
-    newclass = type(str(mnemonic), (Class,), class_attributes)
+    newclass = type(builtin_str(mnemonic), (Class,), class_attributes)
     CLASSES[mnemonic] = newclass
     return newclass
 
@@ -269,7 +277,7 @@ def _generate_unknown_type(rrtype):
         'value': rrtype,
         'mnemonic': mnemonic,
     }
-    newclass = type(str(mnemonic), (RR,), type_attributes)
+    newclass = type(builtin_str(mnemonic), (RR,), type_attributes)
     TYPES[mnemonic] = newclass
     return newclass
 
