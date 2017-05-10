@@ -43,7 +43,7 @@ def generate(rrtype, **kwargs):
 
 def is_class(rrclass):
     for k in CLASSES:
-        if rrclass.upper() in CLASSES[k]:
+        if rrclass.upper() == k:
             return True
     if re.search(r'^CLASS\d+$', rrclass.uppper()):
         return True
@@ -52,8 +52,9 @@ def is_class(rrclass):
 
 
 def get_class(rrclass):
-    if type(rrclass) is type and issubclass(rrclass, Class):
-        return rrclass
+    mnemonic = get_class_mnemonic(rrclass)
+    if mnemonic in CLASSES:
+        return CLASSES[mnemonic]
     else:
         return _generate_unknown_class(get_class_value(rrclass))
 
@@ -206,8 +207,9 @@ def is_type(rrtype):
 
 
 def get_type(rrtype):
-    if type(rrtype) is type and issubclass(rrtype, RR):
-        return rrtype
+    mnemonic = get_type_mnemonic(rrtype)
+    if mnemonic in TYPES:
+        return TYPES[mnemonic]
     else:
         return _generate_unknown_type(get_type_value(rrtype))
 
@@ -308,7 +310,7 @@ class RR(object):
     # place of this.
     _fmt_str = "{oname} {ttl} {rrclass} {rrtype} {rdata}"
 
-    def __init__(self, oname, rrclass, ttl=None, zone=None, **rdata):
+    def __init__(self, oname, rrclass=None, ttl=None, zone=None, **rdata):
         """
         Initialize a new RR object.
 
@@ -322,7 +324,10 @@ class RR(object):
                 "rrclass {!r} not valid for this RR type".format(rrclass)
             )
         self.oname = oname
-        self.rrclass = get_class(rrclass)
+        if rrclass is not None:
+            self.rrclass = get_class(rrclass)
+        else:
+            self.rrclass = None
         self.ttl = ttl
         self.zone = zone
 
@@ -331,7 +336,9 @@ class RR(object):
                 setattr(self, field, rdata[field])
                 del(rdata[field])
             except KeyError:
-                raise KeyError("rdata field {!r} is required".format(field))
+                raise KeyError("rdata field {!r} is required ({!r})".format(
+                    field, rdata
+                ))
 
     def __str__(self):
         if self.zone and hasattr(self.zone, '_global_fmt_str'):
