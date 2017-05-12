@@ -237,9 +237,9 @@ class Zone(OrderedDict):
         Delete all resource records matching the attrbitues in **kwargs.
         """
         del_onames = []
-        for oname in self.rrs:
+        for oname in self:
             del_rrs = []
-            for rr in self.rrs[oname]:
+            for rr in self[oname]:
                 delete = True
                 for k in kwargs:
                     if k not in rr:
@@ -251,12 +251,12 @@ class Zone(OrderedDict):
                 if delete:
                     del_rrs.append(rr)
             for rr in del_rrs:
-                self.rrs[oname].remove(rr)
+                self[oname].remove(rr)
             # If an oname has no more RRs then we delete it too
-            if len(self.rrs[oname]) == 0:
+            if len(self[oname]) == 0:
                 del_onames.append(oname)
         for oname in del_onames:
-            del(self.rrs[oname])
+            del(self[oname])
 
     def add_rr(self, rr):
         """
