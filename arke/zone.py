@@ -216,15 +216,17 @@ class Zone(OrderedDict):
 
         return "\n".join(output) + "\n"
 
-    # TODO: This self.__dict__ comparison doesn't work in 2.7 .. also must
-    # implement remaining rich comparison operators.
+    # TODO: this doesn't actually work.  Going to need to implement the Zone
+    # class as a child of `object` instead, and directly implement rich
+    # comparison operators that way.
     def __eq__(self, other):
         if type(self) is type(other):
-            if (
-                    self.name == other.name and
-                    self.__dict__ == other.__dict__
-            ):
-                return True
+            if self.name == other.name:
+                return super().__eq__(other)
+            else:
+                return False
+        else:
+            return NotImplemented
 
     @classmethod
     def from_file(cls, f, name, rrclass=arke.rr.IN):
